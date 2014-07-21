@@ -26,29 +26,34 @@ namespace tm4cpp
       DigitalPeripheral(uint32_t direction, uint8_t pins)
       {
         DigitalPeripheral();
-        setPinDirections(direction, pins);
+        setPinDirection(pins, direction);
       }
 
-      void setPinDirections(uint32_t direction, uint8_t pins) const
+      void setPinDirection(uint8_t pins, uint32_t direction) const
       {
         MAP_GPIODirModeSet(_gpio.basePort, pins, direction);
         MAP_GPIOPadConfigSet(_gpio.basePort, pins, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
       }
 
-      void writePins(uint8_t pins, uint8_t value) const
+      void writePin(uint8_t pins, uint8_t value) const
       {
-        GPIOPinWrite(_gpio.basePort, pins, value);
+        MAP_GPIOPinWrite(_gpio.basePort, pins, value);
       }
 
-      void setPin(uint8_t pin, bool value) const
+      void setPinHigh(uint8_t pin) const
       {
-        GPIOPinWrite(_gpio.basePort, pin, value ? 0xFF : 0x00);
+        MAP_GPIOPinWrite(_gpio.basePort, pin, pin);
+      }
+
+      void setPinLow(uint8_t pin) const
+      {
+        MAP_GPIOPinWrite(_gpio.basePort, pin, 0x00);
       }
 
       void togglePin(uint8_t pin) const
       {
         int8_t pinValue = MAP_GPIOPinRead(_gpio.basePort, pin) ^ pin;
-        GPIOPinWrite(_gpio.basePort, pin, pinValue);
+        MAP_GPIOPinWrite(_gpio.basePort, pin, pinValue);
       }
   };
 
