@@ -3,6 +3,8 @@
 
 **This repository contains a work in progress codebase, plase don't use it yet!**
 
+I started this project because I think a basic Hello ~~World~~ Blink should look like at least this elegant:
+
 ```cpp
 #include "mcu.h"
 
