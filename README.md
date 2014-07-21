@@ -17,8 +17,8 @@ class Main: Application
   public:
     Main()
     {
-      gpioF.setPinDirections(gpio::Output, gpio::Pin1 | gpio::Pin3);
-      gpioF.setPin(gpio::Pin3, true);
+      gpioF.setPinDirection(gpio::Pin1 | gpio::Pin3, gpio::Output);
+      gpioF.setPinHigh(gpio::Pin3);
     }
 
     void runLoop()
@@ -26,7 +26,8 @@ class Main: Application
       gpioF.togglePin(gpio::Pin1 | gpio::Pin3);
       SystemTimer::delay(100);
     }
-
 };
 
 ```
+
+Currently the code above compiles to a 1016 byte binary with my custom Clang/ARM-GCC toolchain.
