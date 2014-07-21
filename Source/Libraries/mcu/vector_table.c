@@ -36,7 +36,8 @@ extern void ResetISR(void);
 extern uint32_t _stack_end;
 
 // Stack top and vector handler table
-void *vector_table[] __attribute__ ((section(".isr_vector"))) = { &_stack_end,                            // The initial stack pointer
+void *vector_table[] __attribute__ ((section(".isr_vector"))) = {
+    &_stack_end,                            // The initial stack pointer
     ResetISR,                               // The reset handler
     NmiSR,                                  // The NMI handler
     FaultISR,                               // The hard fault handler
