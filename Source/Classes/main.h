@@ -13,18 +13,18 @@ using namespace tm4cpp;
 
 class Main: Application
 {
-    DigitalPeripheral<gpio::F> gpioF;
+    Port<gpio::F> portF;
 
   public:
     Main()
     {
-      gpioF.setPinDirection(gpio::Pin1 | gpio::Pin3, gpio::Output);
-      gpioF.setPinHigh(gpio::Pin3);
+      portF.setPinDirection(gpio::Pin1 | gpio::Pin3, gpio::Output);
+      portF.setPinHigh(gpio::Pin3);
     }
 
     void runLoop()
     {
-      gpioF.togglePin(gpio::Pin1 | gpio::Pin3);
+      portF.togglePin(gpio::Pin1 | gpio::Pin3);
       SystemTimer::delay(100);
     }
 };

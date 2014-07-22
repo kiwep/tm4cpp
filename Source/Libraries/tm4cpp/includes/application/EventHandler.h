@@ -9,4 +9,9 @@
 
 class EventHandler
 {
+  public:
+    void _handleGPIOInterrupt(const uint8_t index, const uint32_t flags)
+    {
+
+    }
 };

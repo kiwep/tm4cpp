@@ -9,6 +9,8 @@
 #ifdef __cplusplus
 
 #include "includes/application/EventHandler.h"
+#include "includes/interrupts/InterruptNumbers.h"
+#include "includes/interrupts/InterruptRouter.h"
 #include "includes/application/Application.h"
 
 #endif

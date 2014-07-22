@@ -8,29 +8,38 @@
 #include "mcu.h"
 
 // Weak linking provides default implementation when a handler is not defined elsewhere
-#define WEAK_ALIAS(x) __attribute__ ((weak, alias(#x)))
+// #define WEAK_ALIAS(x) __attribute__ ((weak, alias(#x)))
 
 // Forward declaration of the default fault handlers.
-void NmiSR(void);
-void FaultISR(void);
-void MPUFaultISR(void);
-void BusFaultISR(void);
-void UsageFaultISR(void);
-void IntDefaultHandler(void);
-
-// Stub interrupt handlers
-void SysTickHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioAintHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioBintHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioCintHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioDintHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioEintHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioFintHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioGintHandler(void) WEAK_ALIAS(IntDefaultHandler);
-void GpioHintHandler(void) WEAK_ALIAS(IntDefaultHandler);
+void NmiSR();
+void FaultISR();
+void MPUFaultISR();
+void BusFaultISR();
+void UsageFaultISR();
+void IntDefaultHandler();
 
 // The entry point for the MCU
-extern void ResetISR(void);
+extern void ResetISR();
+
+// Stub interrupt handlers
+extern void SysTickHandler();
+extern void GpioAintHandler();
+extern void GpioBintHandler();
+extern void GpioCintHandler();
+extern void GpioDintHandler();
+extern void GpioEintHandler();
+extern void GpioFintHandler();
+extern void GpioGintHandler();
+extern void GpioHintHandler();
+extern void GpioJintHandler();
+extern void GpioKintHandler();
+extern void GpioLintHandler();
+extern void GpioMintHandler();
+extern void GpioNintHandler();
+extern void GpioPintHandler();
+extern void GpioQintHandler();
+extern void GpioRintHandler();
+extern void GpioSintHandler();
 
 // Addresses pulled in from the linker script
 extern uint32_t _stack_end;
@@ -107,9 +116,9 @@ void *vector_table[] __attribute__ ((section(".isr_vector"))) = {
     IntDefaultHandler,                      // ADC1 Sequence 3
     0,                                      // Reserved
     0,                                      // Reserved
-    IntDefaultHandler,                      // GPIO Port J
-    IntDefaultHandler,                      // GPIO Port K
-    IntDefaultHandler,                      // GPIO Port L
+    GpioJintHandler,                        // GPIO Port J
+    GpioKintHandler,                        // GPIO Port K
+    GpioLintHandler,                        // GPIO Port L
     IntDefaultHandler,                      // SSI2 Rx and Tx
     IntDefaultHandler,                      // SSI3 Rx and Tx
     IntDefaultHandler,                      // UART3 Rx and Tx
@@ -164,12 +173,12 @@ void *vector_table[] __attribute__ ((section(".isr_vector"))) = {
     0,                                      // Reserved
     IntDefaultHandler,                      // I2C4 Master and Slave
     IntDefaultHandler,                      // I2C5 Master and Slave
-    IntDefaultHandler,                      // GPIO Port M
-    IntDefaultHandler,                      // GPIO Port N
+    GpioMintHandler,                        // GPIO Port M
+    GpioNintHandler,                        // GPIO Port N
     IntDefaultHandler,                      // Quadrature Encoder 2
     0,                                      // Reserved
     0,                                      // Reserved
-    IntDefaultHandler,                      // GPIO Port P (Summary or P0)
+    GpioPintHandler,                        // GPIO Port P (Summary or P0)
     IntDefaultHandler,                      // GPIO Port P1
     IntDefaultHandler,                      // GPIO Port P2
     IntDefaultHandler,                      // GPIO Port P3
@@ -177,7 +186,7 @@ void *vector_table[] __attribute__ ((section(".isr_vector"))) = {
     IntDefaultHandler,                      // GPIO Port P5
     IntDefaultHandler,                      // GPIO Port P6
     IntDefaultHandler,                      // GPIO Port P7
-    IntDefaultHandler,                      // GPIO Port Q (Summary or Q0)
+    GpioQintHandler,                        // GPIO Port Q (Summary or Q0)
     IntDefaultHandler,                      // GPIO Port Q1
     IntDefaultHandler,                      // GPIO Port Q2
     IntDefaultHandler,                      // GPIO Port Q3
@@ -185,8 +194,8 @@ void *vector_table[] __attribute__ ((section(".isr_vector"))) = {
     IntDefaultHandler,                      // GPIO Port Q5
     IntDefaultHandler,                      // GPIO Port Q6
     IntDefaultHandler,                      // GPIO Port Q7
-    IntDefaultHandler,                      // GPIO Port R
-    IntDefaultHandler,                      // GPIO Port S
+    GpioRintHandler,                        // GPIO Port R
+    GpioSintHandler,                        // GPIO Port S
     IntDefaultHandler,                      // PWM 1 Generator 0
     IntDefaultHandler,                      // PWM 1 Generator 1
     IntDefaultHandler,                      // PWM 1 Generator 2
@@ -195,42 +204,42 @@ void *vector_table[] __attribute__ ((section(".isr_vector"))) = {
     };
 
 // NMI handler
-void NmiSR(void)
+void NmiSR()
 {
   while (1)
     ;
 }
 
 // Fault handler
-void FaultISR(void)
+void FaultISR()
 {
   while (1)
     ;
 }
 
 // The MPU fault handler
-void MPUFaultISR(void)
+void MPUFaultISR()
 {
   while (1)
     ;
 }
 
 // The bus fault handler
-void BusFaultISR(void)
+void BusFaultISR()
 {
   while (1)
     ;
 }
 
 // The usage fault handler
-void UsageFaultISR(void)
+void UsageFaultISR()
 {
   while (1)
     ;
 }
 
 // Unexpected interrupt handler
-void IntDefaultHandler(void)
+void IntDefaultHandler()
 {
   while (1)
     ;

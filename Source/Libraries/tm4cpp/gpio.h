@@ -9,7 +9,7 @@
 #ifdef __cplusplus
 
 #include "includes/gpio/GpioPorts.h"
-#include "includes/gpio/DigitalPeripheral.h"
+#include "includes/gpio/Port.h"
 
 #endif
 
