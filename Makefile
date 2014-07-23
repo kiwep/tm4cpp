@@ -134,18 +134,24 @@ clean:
 $(productTarget): $(productElf)
 	@mkdir -p $(dir $@)
 	@$(OBJCOPY) -O binary $< $@
-	@$(SIZE) $(productElf)
+	@echo $$'\e[32m'"[completed] resulting binary size:"$$'\e[32;1m' `stat -f %z $@` $$'\e[0m'$$'\e[32m'"bytes"$$'\e[0m'
+	
+	
+# @$(SIZE) $(productElf)
 
 $(productElf): $(objFileList)
 	@mkdir -p $(dir $@)
+	@echo $$'\e[33m'"[linking  ] $(notdir $(productElf))"$$'\e[0m'
 	@$(LD) $(LFLAGS) $(objFileList) $(LGROUPS) -o $(productElf)
 
 $(buildDir)/%.c.o : $(sourceDir)/%.c
 	@mkdir -p "$(dir $@)"
+	@echo $$'\e[33m'"[compiling] $(notdir $<)"$$'\e[0m'
 	@$(CC) $(CFLAGS) -o $@ -c $<
 
 $(buildDir)/%.cpp.o : $(sourceDir)/%.cpp
 	@mkdir -p "$(dir $@)"
+	@echo $$'\e[33m'"[compiling] $(notdir $<)"$$'\e[0m'
 	@$(CXX) -fno-rtti $(CFLAGS) -o $@ -c $<
 
 include $(dSources:.o=.d)
