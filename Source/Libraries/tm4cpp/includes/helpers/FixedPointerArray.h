@@ -9,6 +9,8 @@
 
 #include <stddef.h>
 
+// NOT USED
+
 namespace tm4cpp
 {
 
@@ -26,7 +28,7 @@ namespace tm4cpp
         void add(T *handler);
         void remove(T *handler);
         uint8_t size();
-        T* operator[] (const uint8_t index);
+        T* operator[](const uint8_t index);
     };
 
     template<typename T, uint8_t S>
@@ -77,7 +79,7 @@ namespace tm4cpp
     }
 
     template<typename T, uint8_t S>
-    inline T* FixedPointerArray<T, S>::operator[] (const uint8_t index)
+    inline T* FixedPointerArray<T, S>::operator[](const uint8_t index)
     {
       return _items[index];
     }

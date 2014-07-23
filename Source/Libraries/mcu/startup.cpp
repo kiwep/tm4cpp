@@ -70,7 +70,7 @@ extern "C" void ResetISR(void)
 #endif
 
   // Initialize the interrupt router helper
-//  InterruptRouter::initialize();
+  InterruptRouter::initialize();
 
   // Start application
   Main mainApp;

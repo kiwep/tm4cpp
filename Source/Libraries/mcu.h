@@ -32,12 +32,14 @@
 #include "tivaware/inc/hw_types.h"
 #include "tivaware/inc/hw_gpio.h"
 #include "tivaware/inc/hw_uart.h"
+#include "tivaware/inc/hw_ints.h"
 
 // TivaWare Driverlib includes
 #include "tivaware/driverlib/rom.h"
 #include "tivaware/driverlib/rom_map.h"
 #include "tivaware/driverlib/gpio.h"
 #include "tivaware/driverlib/sysctl.h"
+#include "tivaware/driverlib/interrupt.h"
 
 // Debug logger
 #ifdef DEBUG

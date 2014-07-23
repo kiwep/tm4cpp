@@ -8,7 +8,7 @@
 #include "mcu.h"
 
 // Weak linking provides default implementation when a handler is not defined elsewhere
-// #define WEAK_ALIAS(x) __attribute__ ((weak, alias(#x)))
+ #define WEAK_ALIAS(x) __attribute__ ((weak, alias(#x)))
 
 // Forward declaration of the default fault handlers.
 void NmiSR();
@@ -36,10 +36,10 @@ extern void GpioKintHandler();
 extern void GpioLintHandler();
 extern void GpioMintHandler();
 extern void GpioNintHandler();
-extern void GpioPintHandler();
-extern void GpioQintHandler();
-extern void GpioRintHandler();
-extern void GpioSintHandler();
+extern void GpioPintHandler() WEAK_ALIAS(IntDefaultHandler);
+extern void GpioQintHandler() WEAK_ALIAS(IntDefaultHandler);
+extern void GpioRintHandler() WEAK_ALIAS(IntDefaultHandler);
+extern void GpioSintHandler() WEAK_ALIAS(IntDefaultHandler);
 
 // Addresses pulled in from the linker script
 extern uint32_t _stack_end;

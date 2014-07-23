@@ -7,41 +7,40 @@
 
 #include "mcu.h"
 #include "../../includes/interrupts/InterruptRouter.h"
-#include "../../includes/gpio/GpioPorts.h"
 
 namespace tm4cpp
 {
-  EventHandlerPointerArray InterruptRouter::__targets[kEventVectorSize];
+  _internal::InterruptTarget *InterruptRouter::__interruptTargets[kInterruptVectorSize];
 
-//  void InterruptRouter::initialize()
-//  {
-//  }
-
-  void InterruptRouter::handleGPIOInterrupt(const uint8_t index, const uint32_t flags)
+  void InterruptRouter::initialize()
   {
-    EventHandlerPointerArray handlerArray = InterruptRouter::__targets[index];
-    uint8_t s = handlerArray.size();
-    if (s > 0) {
-      uint8_t i;
-      for (i = 0; i < s; i++) {
-        handlerArray[i]->_handleGPIOInterrupt(index, flags);
-      }
+    for (uint_fast8_t i = 0; i < kInterruptVectorSize; i++) {
+      InterruptRouter::__interruptTargets[i] = 0;
     }
   }
 
-} /* namespace tm4cpp */
+  void InterruptRouter::addHandler(_internal::InterruptTarget *handler, const uint8_t index)
+  {
+    InterruptRouter::__interruptTargets[index] = handler;
+  }
 
+  void InterruptRouter::removeHandler(const uint8_t index)
+  {
+    InterruptRouter::__interruptTargets[index] = 0;
+  }
+
+} /* namespace tm4cpp */
 
 
 #define GPIO_HANDLER_FN(letter) \
     void Gpio##letter##intHandler() \
     { \
       uint32_t st = MAP_GPIOIntStatus(tm4cpp::gpio::letter::basePort, true); \
+      uint8_t index = tm4cpp::gpio::letter::eventIndex; \
       MAP_GPIOIntClear(tm4cpp::gpio::letter::basePort, st); \
-      tm4cpp::InterruptRouter::handleGPIOInterrupt(tm4cpp::gpio::letter::eventIndex, st); \
+      tm4cpp::_internal::InterruptTarget *handler = tm4cpp::InterruptRouter::__interruptTargets[index]; \
+      if (handler != 0) handler->_handleGPIOInterrupt(index, st); \
     }
-
-
 
 extern "C"
 {
@@ -58,8 +57,8 @@ extern "C"
   GPIO_HANDLER_FN(L)
   GPIO_HANDLER_FN(M)
   GPIO_HANDLER_FN(N)
-  GPIO_HANDLER_FN(P)
-  GPIO_HANDLER_FN(Q)
-  GPIO_HANDLER_FN(R)
-  GPIO_HANDLER_FN(S)
+//  GPIO_HANDLER_FN(P)
+//  GPIO_HANDLER_FN(Q)
+//  GPIO_HANDLER_FN(R)
+//  GPIO_HANDLER_FN(S)
 }

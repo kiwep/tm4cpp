@@ -7,78 +7,152 @@
 
 #pragma once
 
+#include "mcu.h"
 #include <stdint.h>
 #include "driverlib/gpio.h"
+#include "GpioPorts.h"
+#include "../interrupts/InterruptRouter.h"
+#include "../helpers/Empty.h"
 
 namespace tm4cpp
 {
-  #define ClassTemplate template<typename TGpio>
 
-  ClassTemplate
-  class Port: TGpio
+  template<typename TGpio, typename IClass = _internal::Empty>
+  class Port: public _internal::InterruptTarget
   {
-    public:
-      // constructors
-      Port();
-      Port(uint32_t direction, uint8_t pins);
+      typedef void (IClass::*IHObjMemberFunc)(uint8_t);
 
-      // setting up the port
-      void setPinDirection(uint8_t pins, uint32_t direction) const;
+      IClass *interruptHandlerObj;
+      IHObjMemberFunc interruptHandlerMethod;
+
+    public:
+
+      Port();
+      ~Port();
+
+      void setupPins(const uint8_t &pins = 0xff, const uint32_t &direction = gpio::Output,
+                     const uint32_t &strength = gpio::Strength2ma, const uint32_t &type = gpio::TypeStd) const;
 
       // writing pins
-      void writePin(uint8_t pins, uint8_t value) const;
-      void setPinHigh(uint8_t pin) const;
-      void setPinLow(uint8_t pin) const;
-      void togglePin(uint8_t pin) const;
+      void writePins(const uint8_t &pins, const uint8_t &value) const;
+      void setPin(const uint8_t &pin, const bool &value) const;
+      void setPinHigh(const uint8_t &pin) const;
+      void setPinLow(const uint8_t &pin) const;
+      void togglePin(const uint8_t &pin) const;
+
+      uint8_t readPins(const uint8_t &pins = 0xff) const;
+      bool getPin(const uint8_t &pin) const;
+
+      // interrupt handling and delegating
+      void enablePinInterrupts(const uint8_t &pin, const uint32_t &eventType);
+      void clearPinInterrupts();
+      void setInterruptCallback(IClass *obj, IHObjMemberFunc func);
+      void _handleGPIOInterrupt(const uint8_t index, const uint32_t flags);
+
   };
 
   /**
    * Port implementation
    */
 
-  ClassTemplate
-  inline Port<TGpio>::Port()
+#define PortBaseTmpl(type) template<typename TGpio, typename IClass> inline type Port<TGpio, IClass>
+
+  PortBaseTmpl()::Port()
   {
+    interruptHandlerObj = NULL;
+    interruptHandlerMethod = NULL;
+
+    InterruptRouter::addHandler(this, TGpio::eventIndex);
     MAP_SysCtlPeripheralEnable(TGpio::peripheral);
   }
 
-  ClassTemplate
-  inline Port<TGpio>::Port(uint32_t direction, uint8_t pins)
+  PortBaseTmpl()::~Port()
   {
-    Port();
-    setPinDirection(pins, direction);
+    clearPinInterrupts();
+    MAP_SysCtlPeripheralDisable(TGpio::peripheral);
+    InterruptRouter::removeHandler(TGpio::eventIndex);
   }
 
-  ClassTemplate
-  inline void Port<TGpio>::setPinDirection(uint8_t pins, uint32_t direction) const
+  PortBaseTmpl(void)::setupPins(const uint8_t &pins, const uint32_t &direction, const uint32_t &strength, const uint32_t &type) const
   {
+    if (TGpio::intPort == INT_GPIOF && (pins & 1)) {
+      HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = GPIO_LOCK_KEY;
+      HWREG(GPIO_PORTF_BASE + GPIO_O_CR) |= 0x01;
+      HWREG(GPIO_PORTF_BASE + GPIO_O_LOCK) = 0;
+    }
+
     MAP_GPIODirModeSet(TGpio::basePort, pins, direction);
-    MAP_GPIOPadConfigSet(TGpio::basePort, pins, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD);
+    MAP_GPIOPadConfigSet(TGpio::basePort, pins, strength, type);
   }
 
-  ClassTemplate
-  inline void Port<TGpio>::writePin(uint8_t pins, uint8_t value) const
+  PortBaseTmpl(void)::writePins(const uint8_t &pins, const uint8_t &value) const
   {
     MAP_GPIOPinWrite(TGpio::basePort, pins, value);
   }
 
-  ClassTemplate
-  inline void Port<TGpio>::setPinHigh(uint8_t pin) const
+  PortBaseTmpl(void)::setPin(const uint8_t &pin, const bool &value) const
+  {
+    MAP_GPIOPinWrite(TGpio::basePort, pin, value ? pin : 0x00);
+  }
+
+  PortBaseTmpl(void)::setPinHigh(const uint8_t &pin) const
   {
     MAP_GPIOPinWrite(TGpio::basePort, pin, pin);
   }
 
-  ClassTemplate
-  inline void Port<TGpio>::setPinLow(uint8_t pin) const
+  PortBaseTmpl(void)::setPinLow(const uint8_t &pin) const
   {
     MAP_GPIOPinWrite(TGpio::basePort, pin, 0x00);
   }
 
-  ClassTemplate
-  inline void Port<TGpio>::togglePin(uint8_t pin) const
+  PortBaseTmpl(void)::togglePin(const uint8_t &pin) const
   {
     int8_t pinValue = MAP_GPIOPinRead(TGpio::basePort, pin) ^ pin;
     MAP_GPIOPinWrite(TGpio::basePort, pin, pinValue);
   }
 
-} /* namespace tm4cpp */
+  PortBaseTmpl(uint8_t)::readPins(const uint8_t &pins) const
+  {
+    return MAP_GPIOPinRead(TGpio::basePort, pins);
+  }
+
+  PortBaseTmpl(bool)::getPin(const uint8_t &pin) const
+  {
+    return !!MAP_GPIOPinRead(TGpio::basePort, pin);
+  }
+
+  PortBaseTmpl(void)::enablePinInterrupts(const uint8_t &pin, const uint32_t &eventType)
+  {
+    MAP_IntMasterDisable();
+    MAP_GPIOIntClear(TGpio::basePort, pin);
+    MAP_GPIOIntTypeSet(TGpio::basePort, pin, eventType);
+    MAP_GPIOIntEnable(TGpio::basePort, pin);
+    MAP_IntEnable(TGpio::intPort);
+    MAP_IntMasterEnable();
+
+  }
+
+  PortBaseTmpl(void)::setInterruptCallback(IClass *obj, IHObjMemberFunc func)
+  {
+    interruptHandlerObj = obj;
+    interruptHandlerMethod = func;
+  }
+
+  PortBaseTmpl(void)::clearPinInterrupts()
+  {
+    if (MAP_IntIsEnabled(TGpio::intPort)) {
+      MAP_IntDisable(TGpio::intPort);
+      MAP_GPIOIntClear(TGpio::basePort, 0xff);
+      MAP_GPIOIntDisable(TGpio::basePort, 0xff);
+    }
+  }
+
+  PortBaseTmpl(void)::_handleGPIOInterrupt(const uint8_t index, const uint32_t flags)
+  {
+    if (interruptHandlerObj != NULL) {
+      ((*interruptHandlerObj).*(interruptHandlerMethod))(flags);
+    }
+  }
+
+}
+/* namespace tm4cpp */
