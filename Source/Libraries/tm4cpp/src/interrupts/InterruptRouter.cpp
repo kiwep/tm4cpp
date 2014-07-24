@@ -10,23 +10,21 @@
 
 namespace tm4cpp
 {
-  _internal::InterruptTarget *InterruptRouter::__interruptTargets[kInterruptVectorSize];
-
   void InterruptRouter::initialize()
   {
     for (uint_fast8_t i = 0; i < kInterruptVectorSize; i++) {
-      InterruptRouter::__interruptTargets[i] = 0;
+      __interruptDelegateTable[i] = 0;
     }
   }
 
-  void InterruptRouter::addHandler(_internal::InterruptTarget *handler, const uint8_t index)
+  void InterruptRouter::addDelegate(const uint8_t index, InterruptDelegate *delegate)
   {
-    InterruptRouter::__interruptTargets[index] = handler;
+    __interruptDelegateTable[index] = delegate;
   }
 
-  void InterruptRouter::removeHandler(const uint8_t index)
+  void InterruptRouter::removeDelegate(const uint8_t index)
   {
-    InterruptRouter::__interruptTargets[index] = 0;
+    __interruptDelegateTable[index] = NULL;
   }
 
 } /* namespace tm4cpp */
@@ -38,8 +36,8 @@ namespace tm4cpp
       uint32_t st = MAP_GPIOIntStatus(tm4cpp::gpio::letter::basePort, true); \
       uint8_t index = tm4cpp::gpio::letter::eventIndex; \
       MAP_GPIOIntClear(tm4cpp::gpio::letter::basePort, st); \
-      tm4cpp::_internal::InterruptTarget *handler = tm4cpp::InterruptRouter::__interruptTargets[index]; \
-      if (handler != 0) handler->_handleGPIOInterrupt(index, st); \
+      tm4cpp::InterruptDelegate delegate = *tm4cpp::__interruptDelegateTable[index]; \
+      if (delegate) delegate(st); \
     }
 
 extern "C"
@@ -57,7 +55,8 @@ extern "C"
   GPIO_HANDLER_FN(L)
   GPIO_HANDLER_FN(M)
   GPIO_HANDLER_FN(N)
-//  GPIO_HANDLER_FN(P)
+
+    //  GPIO_HANDLER_FN(P)
 //  GPIO_HANDLER_FN(Q)
 //  GPIO_HANDLER_FN(R)
 //  GPIO_HANDLER_FN(S)

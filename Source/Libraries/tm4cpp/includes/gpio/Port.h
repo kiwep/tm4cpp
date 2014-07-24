@@ -18,12 +18,10 @@ namespace tm4cpp
 {
 
   template<typename TGpio, typename IClass = _internal::Empty>
-  class Port: public _internal::InterruptTarget
+  class Port
   {
       typedef void (IClass::*IHObjMemberFunc)(uint8_t);
-
-      IClass *interruptHandlerObj;
-      IHObjMemberFunc interruptHandlerMethod;
+      InterruptDelegate _delegate;
 
     public:
 
@@ -47,6 +45,7 @@ namespace tm4cpp
       void enablePinInterrupts(const uint8_t &pin, const uint32_t &eventType);
       void clearPinInterrupts();
       void setInterruptCallback(IClass *obj, IHObjMemberFunc func);
+      void clearInterruptCallback();
       void _handleGPIOInterrupt(const uint8_t index, const uint32_t flags);
 
   };
@@ -59,10 +58,6 @@ namespace tm4cpp
 
   PortBaseTmpl()::Port()
   {
-    interruptHandlerObj = NULL;
-    interruptHandlerMethod = NULL;
-
-    InterruptRouter::addHandler(this, TGpio::eventIndex);
     MAP_SysCtlPeripheralEnable(TGpio::peripheral);
   }
 
@@ -70,7 +65,7 @@ namespace tm4cpp
   {
     clearPinInterrupts();
     MAP_SysCtlPeripheralDisable(TGpio::peripheral);
-    InterruptRouter::removeHandler(TGpio::eventIndex);
+    clearInterruptCallback();
   }
 
   PortBaseTmpl(void)::setupPins(const uint8_t &pins, const uint32_t &direction, const uint32_t &strength, const uint32_t &type) const
@@ -134,8 +129,13 @@ namespace tm4cpp
 
   PortBaseTmpl(void)::setInterruptCallback(IClass *obj, IHObjMemberFunc func)
   {
-    interruptHandlerObj = obj;
-    interruptHandlerMethod = func;
+    _delegate = fastdelegate::MakeDelegate(obj, func);
+    InterruptRouter::addDelegate(TGpio::eventIndex, &_delegate);
+  }
+
+  PortBaseTmpl(void)::clearInterruptCallback()
+  {
+    InterruptRouter::removeDelegate(TGpio::eventIndex);
   }
 
   PortBaseTmpl(void)::clearPinInterrupts()
@@ -144,13 +144,6 @@ namespace tm4cpp
       MAP_IntDisable(TGpio::intPort);
       MAP_GPIOIntClear(TGpio::basePort, 0xff);
       MAP_GPIOIntDisable(TGpio::basePort, 0xff);
-    }
-  }
-
-  PortBaseTmpl(void)::_handleGPIOInterrupt(const uint8_t index, const uint32_t flags)
-  {
-    if (interruptHandlerObj != NULL) {
-      ((*interruptHandlerObj).*(interruptHandlerMethod))(flags);
     }
   }
 
