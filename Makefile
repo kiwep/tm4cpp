@@ -26,12 +26,12 @@ ifeq ($(BuildConfig),RELEASE)
 	buildConfigStr := Release
 	CFLAGS := -Os
 else
+	buildConfigStr := Debug
+	CFLAGS := -g -O0 -DDEBUG
 	ifeq ($(BuildConfig),QEMU)
 		buildConfigStr := Qemu
-		CFLAGS := -g -O0 -DDEBUG -DTARGET_QEMU
+		CFLAGS += -DTARGET_QEMU
 	else
-		buildConfigStr := Debug
-		CFLAGS := -g -O0 -DDEBUG
 	endif
 endif
 

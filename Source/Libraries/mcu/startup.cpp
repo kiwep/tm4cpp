@@ -75,6 +75,7 @@ extern "C" void ResetISR(void)
   // Start application
   Main mainApp;
   while(1) {
+    Runtime::runLoop();
     mainApp.runLoop();
   }
 

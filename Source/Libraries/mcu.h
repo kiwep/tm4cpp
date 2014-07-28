@@ -49,6 +49,13 @@
 #endif
 
 // TM4C++ header files
-#include "tm4cpp/framework.h"
-#include "tm4cpp/gpio.h"
-#include "tm4cpp/timing.h"
+#ifdef __cplusplus
+#include "tm4cpp/GpioPorts.h"
+#include "tm4cpp/InterruptNumbers.h"
+#include "tm4cpp/Runnable.h"
+#include "tm4cpp/Runtime.h"
+#include "tm4cpp/InterruptRouter.h"
+#include "tm4cpp/SystemTimer.h"
+#include "tm4cpp/Port.h"
+#include "tm4cpp/Button.h"
+#endif

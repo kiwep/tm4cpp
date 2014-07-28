@@ -6,7 +6,7 @@
  */
 
 #include "mcu.h"
-#include "../../includes/interrupts/InterruptRouter.h"
+#include "InterruptRouter.h"
 
 namespace tm4cpp
 {
@@ -17,14 +17,19 @@ namespace tm4cpp
     }
   }
 
-  void InterruptRouter::addDelegate(const uint8_t index, InterruptDelegate *delegate)
+  void InterruptRouter::addDelegate(const uint8_t index, const InterruptDelegate *delegate)
   {
-    __interruptDelegateTable[index] = delegate;
+    __interruptDelegateTable[index] = *delegate;
   }
 
   void InterruptRouter::removeDelegate(const uint8_t index)
   {
-    __interruptDelegateTable[index] = NULL;
+    __interruptDelegateTable[index].clear();
+  }
+
+  bool InterruptRouter::isDelegateRegistered(const uint8_t index)
+  {
+    return !!__interruptDelegateTable[index];
   }
 
 } /* namespace tm4cpp */
@@ -36,7 +41,7 @@ namespace tm4cpp
       uint32_t st = MAP_GPIOIntStatus(tm4cpp::gpio::letter::basePort, true); \
       uint8_t index = tm4cpp::gpio::letter::eventIndex; \
       MAP_GPIOIntClear(tm4cpp::gpio::letter::basePort, st); \
-      tm4cpp::InterruptDelegate delegate = *tm4cpp::__interruptDelegateTable[index]; \
+      tm4cpp::InterruptDelegate delegate = tm4cpp::__interruptDelegateTable[index]; \
       if (delegate) delegate(st); \
     }
 

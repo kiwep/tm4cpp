@@ -11,36 +11,62 @@
 
 using namespace tm4cpp;
 
-class Main
+class Main: public Runnable
 {
-    Port<gpio::F, Main> pF;
-    volatile uint8_t olbBtnMap, newBtnMap;
+    GpioF ioPortF;
+    Button lrButton;
 
   public:
-    Main() :
-        olbBtnMap(0), newBtnMap(0)
+    Main()
     {
       // Output: LEDs
-      pF.setupPins(gpio::Pin1 | gpio::Pin3);
+      ioPortF.setup(gpio::Pin1 | gpio::Pin3);
+      ioPortF(gpio::Pin1, true);
 
-      // Input: Buttons
-      pF.setupPins(gpio::Pin0 | gpio::Pin4, gpio::Input, gpio::Strength2ma, gpio::TypeWeakPullup);
-      pF.setInterruptCallback(this, &Main::mainPortInterruptReceived);
-      pF.enablePinInterrupts(gpio::Pin0 | gpio::Pin4, gpio::BothEdges);
+      // Button setup
+      lrButton.setup(&ioPortF, gpio::Pin0 | gpio::Pin4);
+      lrButton.setEventHandler(this, &Main::onButtonPress, button::Press);
     }
 
-    void mainPortInterruptReceived(uint8_t pins)
+    void onButtonPress(uint8_t pins)
     {
-      newBtnMap = pF.readPins() ^ 0xff;
     }
 
     void runLoop()
     {
-      if (newBtnMap != olbBtnMap) {
-        pF.setPin(gpio::Pin1, (newBtnMap & gpio::Pin0));
-        pF.setPin(gpio::Pin3, (newBtnMap & gpio::Pin4));
-        olbBtnMap = newBtnMap;
-      }
     }
 
 };
+
+
+/*
+
+//      lrButton.setEventHandler(this, &Main::onButtonDown, button::Down);
+//      lrButton.setEventHandler(this, &Main::onButtonUp, button::Up);
+//      addToRunLoop(&lrButton);
+
+      // Input: Buttons
+//      pF.setupPins(gpio::Pin0 | gpio::Pin4, gpio::Input, gpio::Strength2ma, gpio::TypeWeakPullup);
+//      pF.registerInterruptDelegate(this, &Main::mainPortInterruptReceived);
+//      pF.enablePinInterrupts(gpio::Pin0 | gpio::Pin4, gpio::BothEdges);
+
+    void onButtonDown(uint8_t pins)
+    {
+    }
+
+    void onButtonUp(uint8_t pins)
+    {
+    }
+
+//    void mainPortInterruptReceived(uint8_t pins)
+//    {
+//      newBtnMap = pF.readPins() ^ 0xff;
+//    }
+
+//      if (newBtnMap != olbBtnMap) {
+//        pF.setPin(gpio::Pin1, (newBtnMap & gpio::Pin0));
+//        pF.setPin(gpio::Pin3, (newBtnMap & gpio::Pin4));
+//        olbBtnMap = newBtnMap;
+//      }
+
+*/

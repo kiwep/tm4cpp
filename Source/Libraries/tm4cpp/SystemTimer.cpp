@@ -6,7 +6,7 @@
  */
 
 #include "mcu.h"
-#include "../../includes/timing/SystemTimer.h"
+#include "SystemTimer.h"
 
 namespace tm4cpp
 {
