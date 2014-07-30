@@ -20,6 +20,8 @@ namespace tm4cpp
       static void initialize();
       static void delay(uint32_t milliseconds);
       static uint32_t milliseconds();
+      static uint32_t since(const uint32_t &time);
+      static uint32_t distance(const uint32_t &time1, const uint32_t &time2);
       static void reset();
   };
 
@@ -38,6 +40,16 @@ namespace tm4cpp
   inline void SystemTimer::reset()
   {
     __counter = 0;
+  }
+
+  inline uint32_t SystemTimer::since(const uint32_t &time)
+  {
+    return (__counter >= time) ? __counter - time : UINT32_MAX - time + __counter;
+  }
+
+  inline uint32_t SystemTimer::distance(const uint32_t &time1, const uint32_t &time2)
+  {
+    return (time2 >= time1) ? time2 - time1 : UINT32_MAX - time1 + time2;
   }
 
 } /* namespace tm4cpp */

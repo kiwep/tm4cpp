@@ -58,4 +58,5 @@
 #include "tm4cpp/SystemTimer.h"
 #include "tm4cpp/Port.h"
 #include "tm4cpp/Button.h"
+#include "tm4cpp/Pulser.h"
 #endif

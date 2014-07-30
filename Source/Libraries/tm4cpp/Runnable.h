@@ -12,7 +12,7 @@ namespace tm4cpp
   class Runnable
   {
     public:
-      virtual void runLoop() =0;
+      virtual void runLoop() {};
       virtual ~Runnable() {};
   };
 }
