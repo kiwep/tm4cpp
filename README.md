@@ -5,8 +5,7 @@
 
 I started this project because I think a basic Hello ~~World~~ Blink should look like at least this elegant:
 
-```
-cpp
+```cpp
 #include "mcu.h"
 
 using namespace tm4cpp;
@@ -35,8 +34,7 @@ class Main: public Runnable
 
 The problem with the blinking led example is that it's too simple. You want to make a lot more complex things then that, don't you? Ok then lets see a little more andvanced stuff, handling two buttons:
 
-```
-cpp
+```cpp
 #include "mcu.h"
 
 using namespace tm4cpp;
