@@ -20,7 +20,7 @@ namespace tm4cpp
       Pulser();
       ~Pulser();
 
-      void setup(GpioPortBase *port, const uint8_t &pins);
+      void setup(_GpioPort *port, const uint8_t &pins);
 
       void emit(const uint8_t &pin);
       void emitWhen(const bool &condition, const uint8_t &pin);
@@ -32,15 +32,15 @@ namespace tm4cpp
       void runLoop();
 
     private:
-      GpioPortBase *gpioPort;
-      uint8_t enabledPins;
-      uint8_t currentButtonMask;
+      _GpioPort *gpioPort = NULL;
+      uint8_t enabledPins = 0;
+      uint8_t currentButtonMask = 0;
       uint32_t times[8];
-      uint8_t activePinCount;
-      uint32_t pulseLength;
+      uint8_t activePinCount = 0;
+      uint32_t pulseLength = 1;
   };
 
-  inline Pulser::Pulser() : gpioPort(NULL), enabledPins(0), currentButtonMask(0), activePinCount(0), pulseLength(25)
+  inline Pulser::Pulser()
   {
     for (uint8_t i = 0; i < 8; i++) {
       times[i] = 0;
@@ -54,7 +54,7 @@ namespace tm4cpp
     Runtime::removeFromRunLoop(this);
   }
 
-  inline void Pulser::setup(GpioPortBase *port, const uint8_t &pins)
+  inline void Pulser::setup(_GpioPort *port, const uint8_t &pins)
   {
     gpioPort = port;
     enabledPins = pins;

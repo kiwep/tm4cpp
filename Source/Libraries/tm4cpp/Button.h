@@ -13,21 +13,18 @@
 
 namespace tm4cpp
 {
-  namespace button
+  typedef enum ButtonEventType
   {
-    enum EventType
-    {
-      Press,
-      Release
-    };
+    ButtonEventTypePress,
+    ButtonEventTypeRelease
+  } ButtonEventType;
 
-    enum EventFlags
-    {
-      FlagNone = 0,
-      FlagRepeated = 1,
-      FlagLong = 2
-    };
-  }  // namespace button
+  enum ButtonFlag
+  {
+    ButtonFlagNone = 0,
+    ButtonFlagRepeated = 1,
+    ButtonFlagLongPress = 2
+  };
 
   enum _ButtonState
   {
@@ -46,7 +43,7 @@ namespace tm4cpp
       Button();
       ~Button();
 
-      void setup(GpioPortBase *port, const uint8_t &pins, const uint32_t &type = gpio::TypeWeakPullup);
+      void setup(_GpioPort *port, const uint8_t &pins, const PinType &type = PinTypeWeakPullup);
 
       uint32_t getDebounceDelay() const;
       void setDebounceDelay(const uint32_t &delay);
@@ -62,37 +59,33 @@ namespace tm4cpp
       uint32_t getLongPressTimeout();
       void setLongPressTimeout(const uint32_t &timeout);
 
-      template<typename O, typename T> void setEventHandler(O *obj, void (T::*func)(uint8_t, uint8_t), const uint8_t &type);
+      template<typename O, typename T> void setEventHandler(O *obj, void (T::*func)(uint8_t, uint8_t), const ButtonEventType &type);
 
       void handleInterrupt(uint8_t pins);
       void runLoop();
 
     private:
-      GpioPortBase *gpioPort;
-      uint8_t enabledPins;
-      uint8_t pinType;
-      uint8_t knownButtonMask;
+      _GpioPort *gpioPort = NULL;
+      uint8_t enabledPins = 0;
+      PinType pinType = PinTypeStd;
+      uint8_t knownButtonMask = 0;
       volatile uint8_t eventButtonStateQueue[kEventQueueSize];
       volatile uint32_t eventTimeStampQueue[kEventQueueSize];
-      volatile uint8_t eventQueueInsertIndex;
-      uint8_t eventQueueProcessedIndex;
+      volatile uint8_t eventQueueInsertIndex = 0;
+      uint8_t eventQueueProcessedIndex = 0;
       uint32_t buttonDownTimeStamps[8];
       uint8_t buttonStates[8];
-      uint32_t debounceDelay;
-      uint32_t repeatDelay;
-      uint32_t repeatInterval;
-      uint32_t longPressTimeout;
-      uint8_t activeButtonCount;
+      uint32_t debounceDelay = kDefaultDebounceDelay;
+      uint32_t repeatDelay = 0;
+      uint32_t repeatInterval = 0;
+      uint32_t longPressTimeout = 0;
+      uint8_t activeButtonCount = 0;
 
       fastdelegate::FastDelegate2<uint8_t, uint8_t> onPressDelegate;
       fastdelegate::FastDelegate2<uint8_t, uint8_t> onReleaseDelegate;
   };
 
-  inline Button::Button() :
-      gpioPort(NULL), enabledPins(0), pinType(gpio::TypeStd), knownButtonMask(0),
-      eventQueueInsertIndex(0), eventQueueProcessedIndex(0), debounceDelay(kDefaultDebounceDelay),
-      repeatDelay(0), repeatInterval(0), longPressTimeout(0),
-      activeButtonCount(0)
+  inline Button::Button()
   {
     for (uint8_t i = 0; i < kEventQueueSize; i++) {
       eventButtonStateQueue[i] = 0;
@@ -112,17 +105,17 @@ namespace tm4cpp
     Runtime::removeFromRunLoop(this);
   }
 
-  inline void Button::setup(GpioPortBase *port, const uint8_t &pins, const uint32_t &type)
+  inline void Button::setup(_GpioPort *port, const uint8_t &pins, const PinType &type)
   {
     gpioPort = port;
     enabledPins = pins;
     pinType = type;
 
-    gpioPort->setup(enabledPins, gpio::Input, gpio::Strength2ma, type);
+    gpioPort->setup(enabledPins, PinDirectionInput, PinStrength2ma, type);
     if (!gpioPort->isInterruptHandlerSet()) {
       gpioPort->setInterruptHandler(this, &Button::handleInterrupt);
     }
-    gpioPort->enableInterrupts(enabledPins, gpio::BothEdges);
+    gpioPort->enableInterrupts(enabledPins, PinInterruptBothEdges);
   }
 
   inline void Button::handleInterrupt(uint8_t changedPins)
@@ -131,7 +124,7 @@ namespace tm4cpp
     uint8_t portValue = gpioPort->get(enabledPins);
 
     // we get low for the pressed down state if the pin was pulled up so invert the result
-    if (pinType == gpio::TypeWeakPullup) {
+    if (pinType == PinTypeWeakPullup) {
       portValue = portValue ^ enabledPins;
     }
 
@@ -192,13 +185,13 @@ namespace tm4cpp
               // report the down and press events is not reported already
               if (buttonState < _ButtonStatePressed) {
                 if (onPressDelegate) {
-                  onPressDelegate(1 << pinNumber, button::FlagNone);
+                  onPressDelegate(1 << pinNumber, ButtonFlagNone);
                 }
               }
 
               // report the release event
               if (onReleaseDelegate) {
-                onReleaseDelegate(1 << pinNumber, button::FlagNone);
+                onReleaseDelegate(1 << pinNumber, ButtonFlagNone);
               }
 
             }
@@ -247,7 +240,7 @@ namespace tm4cpp
       if (buttonState == _ButtonStateDown && SystemTimer::since(downTimeStamp) > debounceDelay) {
         buttonStates[pinNumber] = _ButtonStatePressed;
         if (onPressDelegate) {
-          onPressDelegate(1 << pinNumber, button::FlagNone);
+          onPressDelegate(1 << pinNumber, ButtonFlagNone);
         }
         continue;
       }
@@ -258,7 +251,7 @@ namespace tm4cpp
         buttonStates[pinNumber] = _ButtonStateRepeating;
         buttonDownTimeStamps[pinNumber] = SystemTimer::milliseconds();
         if (onPressDelegate) {
-          onPressDelegate(1 << pinNumber, button::FlagRepeated);
+          onPressDelegate(1 << pinNumber, ButtonFlagRepeated);
         }
         continue;
       }
@@ -266,7 +259,7 @@ namespace tm4cpp
       if (longPressTimeout > 0 && buttonState == _ButtonStatePressed && SystemTimer::since(downTimeStamp) > longPressTimeout) {
         buttonStates[pinNumber] = _ButtonStateRepeating;
         if (onPressDelegate) {
-          onPressDelegate(1 << pinNumber, button::FlagLong);
+          onPressDelegate(1 << pinNumber, ButtonFlagLongPress);
         }
       }
 
@@ -327,12 +320,12 @@ namespace tm4cpp
   }
 
   template<typename O, typename T>
-  inline void Button::setEventHandler(O *obj, void (T::*func)(uint8_t, uint8_t), const uint8_t &type)
+  inline void Button::setEventHandler(O *obj, void (T::*func)(uint8_t, uint8_t), const ButtonEventType &type)
   {
-    if (type == button::Press) {
+    if (type == ButtonEventTypePress) {
       onPressDelegate = fastdelegate::MakeDelegate(obj, func);
     }
-    else if (type == button::Release) {
+    else if (type == ButtonEventTypeRelease) {
       onReleaseDelegate = fastdelegate::MakeDelegate(obj, func);
     }
   }

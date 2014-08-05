@@ -152,6 +152,6 @@ $(buildDir)/%.c.o : $(sourceDir)/%.c
 $(buildDir)/%.cpp.o : $(sourceDir)/%.cpp
 	@mkdir -p "$(dir $@)"
 	@echo $$'\e[33m'"[compiling] $(notdir $<)"$$'\e[0m'
-	@$(CXX) -fno-rtti $(CFLAGS) -o $@ -c $<
+	@$(CXX) -std=c++11 -fno-rtti $(CFLAGS) -o $@ -c $<
 
 include $(dSources:.o=.d)

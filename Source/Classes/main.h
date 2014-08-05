@@ -14,26 +14,43 @@ using namespace tm4cpp;
 class Main: public Runnable
 {
     GpioF ioPortF;
-    Button buttons;
+    GpioB ioPortB;
+    RotaryEncoder encoder;
+//    Button button;
     Pulser pulser;
 
   public:
 
     Main()
     {
-      // Output: LEDs (Pin1=red, Pin3=green)
-      pulser.setup(&ioPortF, gpio::Pin1 | gpio::Pin3);
+      ioPortF.setup(Pin3, PinDirectionOutput);
 
-      // Button handler setup (Pin0=right, Pin4=left)
-      buttons.setup(&ioPortF, gpio::Pin0 | gpio::Pin4);
-      buttons.setRepeatParameters(500, 200);
-      buttons.setEventHandler(this, &Main::onButtonPress, button::Press);
+      // Pulser handled LEDs (Pin1=red, Pin2=blue, Pin3=green)
+      pulser.setup(&ioPortF, Pin1 | Pin2);
+
+      // Rotary Encoder setup
+      encoder.setup(&ioPortB, Pin0, Pin1, RotaryEncoderTypeDetent);
+      encoder.setEventHandler(this, &Main::onEncoderStepChange);
+
+      // Button on the encoder
+//      button.setup(&ioPortB, Pin4);
+//      button.setEventHandler(this, &Main::onButtonPress, ButtonEventTypePress);
+//      button.setEventHandler(this, &Main::onButtonRelease, ButtonEventTypeRelease);
     }
 
-    void onButtonPress(uint8_t pin, uint8_t flags)
+    void onEncoderStepChange(long newValue, long oldValue)
     {
-      pulser.emitWhen((pin & gpio::Pin0), gpio::Pin1);
-      pulser.emitWhen((pin & gpio::Pin4), gpio::Pin3);
+      pulser((newValue > oldValue) ? Pin1 : Pin2);
     }
+
+//    void onButtonPress(uint8_t pin, uint8_t flags)
+//    {
+//      ioPortF(Pin3, true);
+//    }
+//
+//    void onButtonRelease(uint8_t pin, uint8_t flags)
+//    {
+//      ioPortF(Pin3, false);
+//    }
 
 };

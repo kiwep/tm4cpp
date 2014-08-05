@@ -9,8 +9,6 @@
 
 #include <stddef.h>
 
-// NOT USED
-
 namespace tm4cpp
 {
 

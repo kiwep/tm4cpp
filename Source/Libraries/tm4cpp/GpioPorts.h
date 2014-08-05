@@ -23,61 +23,58 @@
 
 namespace tm4cpp
 {
+  typedef enum Pin
+  {
+    Pin0 = GPIO_PIN_0,
+    Pin1 = GPIO_PIN_1,
+    Pin2 = GPIO_PIN_2,
+    Pin3 = GPIO_PIN_3,
+    Pin4 = GPIO_PIN_4,
+    Pin5 = GPIO_PIN_5,
+    Pin6 = GPIO_PIN_6
+  } Pin;
+
+  typedef enum PinDirection
+  {
+    PinDirectionInput = GPIO_DIR_MODE_IN,
+    PinDirectionOutput = GPIO_DIR_MODE_OUT,
+    PinDirectionHardware = GPIO_DIR_MODE_HW
+  } PinDirection;
+
+  typedef enum PinStrength
+  {
+    PinStrength2ma = GPIO_STRENGTH_2MA,       // 2mA drive strength
+    PinStrength4ma = GPIO_STRENGTH_4MA,       // 4mA drive strength
+    PinStrength6ma = GPIO_STRENGTH_6MA,       // 6mA drive strength
+    PinStrength8ma = GPIO_STRENGTH_8MA,       // 8mA drive strength
+    PinStrength8maSc = GPIO_STRENGTH_8MA_SC,  // 8mA drive with slew rate control
+    PinStrength10ma = GPIO_STRENGTH_10MA,     // 10mA drive strength
+    PinStrength12ma = GPIO_STRENGTH_12MA      // 12mA drive strength
+  } PinStrength;
+
+  typedef enum PinType
+  {
+    PinTypeStd = GPIO_PIN_TYPE_STD,                // Push-pull
+    PinTypeWeakPullup = GPIO_PIN_TYPE_STD_WPU,     // Push-pull with weak pull-up
+    PinTypeWeakPulldown = GPIO_PIN_TYPE_STD_WPD,   // Push-pull with weak pull-down
+    PinTypeOpenDrain = GPIO_PIN_TYPE_OD,           // Open-drain
+    PinTypeAnalog = GPIO_PIN_TYPE_ANALOG,          // Analog comparator
+    PinTypeWakeupHigh = GPIO_PIN_TYPE_WAKE_HIGH,   // Hibernate wake, high
+    PinTypeWakeupLow = GPIO_PIN_TYPE_WAKE_LOW      // Hibernate wake, low
+  } PinType;
+
+  typedef enum PinInterrupt
+  {
+    PinInterruptFallingEdge = GPIO_FALLING_EDGE,   // Interrupt on falling edge
+    PinInterruptRisingEdge = GPIO_RISING_EDGE,     // Interrupt on rising edge
+    PinInterruptBothEdges = GPIO_BOTH_EDGES,       // Interrupt on both edges
+    PinInterruptLowLevel = GPIO_LOW_LEVEL,         // Interrupt on low level
+    PinInterruptHighLevel = GPIO_HIGH_LEVEL,       // Interrupt on high level
+    PinInterruptDiscrete = GPIO_DISCRETE_INT,      // Interrupt for individual pins
+  } PinInterrupt;
 
   namespace gpio
   {
-
-    enum Pin
-    {
-      Pin0 = GPIO_PIN_0,
-      Pin1 = GPIO_PIN_1,
-      Pin2 = GPIO_PIN_2,
-      Pin3 = GPIO_PIN_3,
-      Pin4 = GPIO_PIN_4,
-      Pin5 = GPIO_PIN_5,
-      Pin6 = GPIO_PIN_6
-    };
-
-    enum Direction
-    {
-      Input = GPIO_DIR_MODE_IN,
-      Output = GPIO_DIR_MODE_OUT,
-      Hardware = GPIO_DIR_MODE_HW
-    };
-
-    enum Strength
-    {
-      Strength2ma = GPIO_STRENGTH_2MA,       // 2mA drive strength
-      Strength4ma = GPIO_STRENGTH_4MA,       // 4mA drive strength
-      Strength6ma = GPIO_STRENGTH_6MA,       // 6mA drive strength
-      Strength8ma = GPIO_STRENGTH_8MA,       // 8mA drive strength
-      Strength8maSc = GPIO_STRENGTH_8MA_SC,  // 8mA drive with slew rate control
-      Strength10ma = GPIO_STRENGTH_10MA,     // 10mA drive strength
-      Strength12ma = GPIO_STRENGTH_12MA      // 12mA drive strength
-    };
-
-    enum Type
-    {
-      TypeStd = GPIO_PIN_TYPE_STD,                // Push-pull
-      TypeWeakPullup = GPIO_PIN_TYPE_STD_WPU,     // Push-pull with weak pull-up
-      TypeWeakPulldown = GPIO_PIN_TYPE_STD_WPD,   // Push-pull with weak pull-down
-      TypeOpenDrain = GPIO_PIN_TYPE_OD,           // Open-drain
-      TypeAnalog = GPIO_PIN_TYPE_ANALOG,          // Analog comparator
-      TypeWakeupHigh = GPIO_PIN_TYPE_WAKE_HIGH,   // Hibernate wake, high
-      TypeWakeupLow = GPIO_PIN_TYPE_WAKE_LOW      // Hibernate wake, low
-
-    };
-
-    enum IntEvent
-    {
-      FallingEdge = GPIO_FALLING_EDGE,        // Interrupt on falling edge
-      RisingEdge = GPIO_RISING_EDGE,          // Interrupt on rising edge
-      BothEdges = GPIO_BOTH_EDGES,            // Interrupt on both edges
-      LowLevel = GPIO_LOW_LEVEL,              // Interrupt on low level
-      HighLevel = GPIO_HIGH_LEVEL,            // Interrupt on high level
-      DiscreteInterrupt = GPIO_DISCRETE_INT,  // Interrupt for individual pins
-    };
-
     GEN_PORT_S(A, intr::gpio::A, SYSCTL_PERIPH_GPIOA, GPIO_PORTA_BASE, INT_GPIOA);
     GEN_PORT_S(B, intr::gpio::B, SYSCTL_PERIPH_GPIOB, GPIO_PORTB_BASE, INT_GPIOB);
     GEN_PORT_S(C, intr::gpio::C, SYSCTL_PERIPH_GPIOC, GPIO_PORTC_BASE, INT_GPIOC);
@@ -97,7 +94,6 @@ namespace tm4cpp
 //    GEN_PORT_S(Q, intr::gpio::Q, SYSCTL_PERIPH_GPIOQ, GPIO_PORTQ_BASE, INT_GPIOQ);
 //    GEN_PORT_S(R, intr::gpio::R, SYSCTL_PERIPH_GPIOR, GPIO_PORTR_BASE, INT_GPIOR);
 //    GEN_PORT_S(S, intr::gpio::S, SYSCTL_PERIPH_GPIOS, GPIO_PORTS_BASE, INT_GPIOS);
-
   }
 }
 

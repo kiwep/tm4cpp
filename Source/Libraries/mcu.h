@@ -59,4 +59,5 @@
 #include "tm4cpp/Port.h"
 #include "tm4cpp/Button.h"
 #include "tm4cpp/Pulser.h"
+#include "tm4cpp/RotaryEncoder.h"
 #endif
